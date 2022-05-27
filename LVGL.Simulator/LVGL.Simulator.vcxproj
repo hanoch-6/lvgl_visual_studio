@@ -30,6 +30,7 @@
   <Import Project="LVGL.Portable.vcxitems" />
   <Import Project="LVGL.Drivers.vcxitems" />
   <ItemGroup>
+    <ClInclude Include="GUI_main\gui.h" />
     <ClInclude Include="lv_conf.h" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +44,10 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GUI_main\font\myFont_one.c" />
+    <ClCompile Include="GUI_main\gui.c" />
+    <ClCompile Include="GUI_main\images\bear.c" />
+    <ClCompile Include="GUI_main\images\xiaoxin.c" />
     <ClCompile Include="LVGL.Simulator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -53,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="freetype.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="GUI_main\字库.txt" />
   </ItemGroup>
   <Import Project="Mile.Project.Windows.Legacy\Mile.Project.Cpp.targets" />
 </Project>

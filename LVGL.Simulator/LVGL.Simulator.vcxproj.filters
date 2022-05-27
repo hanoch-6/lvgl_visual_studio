@@ -5,6 +5,7 @@
   <ItemGroup>
     <ClInclude Include="lv_conf.h" />
     <ClInclude Include="lv_drv_conf.h" />
+    <ClInclude Include="GUI_main\gui.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LVGL.Simulator.manifest" />
@@ -15,6 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LVGL.Simulator.cpp" />
+    <ClCompile Include="GUI_main\gui.c" />
+    <ClCompile Include="GUI_main\font\myFont_one.c" />
+    <ClCompile Include="GUI_main\images\xiaoxin.c" />
+    <ClCompile Include="GUI_main\images\bear.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />
@@ -24,5 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="freetype.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="GUI_main\字库.txt" />
   </ItemGroup>
 </Project>
