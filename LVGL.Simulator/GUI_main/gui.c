@@ -43,6 +43,8 @@ static void screen_clean_up(void* scr);
 
 void gui_start(void)
 {
+    start_gif_create();
+    scroll_creatorInfo_create();
     lv_timer_t* timer = lv_timer_create(startup_timer, 1000, NULL);
     lv_timer_set_repeat_count(timer, 5);
 }
@@ -56,6 +58,7 @@ static void start_gif_create(void)
     lv_obj_t* start_gif = lv_gif_create(lv_scr_act());
     lv_gif_set_src(start_gif, &xiaoxin);
     lv_obj_align(start_gif, LV_ALIGN_CENTER, 0, 0);
+
 }
 static void scroll_creatorInfo_create()
 {
@@ -67,23 +70,24 @@ static void scroll_creatorInfo_create()
     //lv_async_call(screen_clean_up, Info);
 
 }
-static void weather_sys_create(void)
+static void menu_create(void)
 {
-    LV_IMG_DECLARE(weather);
+    LV_IMG_DECLARE(sunny);
+    printf("menu create\n");
     lv_obj_t* weather_obj = lv_img_create(lv_scr_act());
-    lv_img_set_src(weather_obj, &weather);
+    lv_img_set_src(weather_obj, &sunny);
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 }
 static void startup_timer(lv_timer_t* timer)
 {
-    printf("user_data = %d\n", timer->user_data);
-    start_gif_create();
-    scroll_creatorInfo_create();
+    if (timer->repeat_count == 0)
+    {
+        lv_async_call(screen_clean_up, lv_scr_act());
+    }
 }
 static void screen_clean_up(void* scr)
 {
-    printf("cleanUP");
-    lv_obj_del(scr);
-    //lv_obj_del_async();
+    printf("clean up the screen\n");
+    lv_obj_clean(scr);
+    menu_create();
 }
-
