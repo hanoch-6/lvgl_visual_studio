@@ -20,6 +20,10 @@
     <ClCompile Include="GUI_main\font\myFont_one.c" />
     <ClCompile Include="GUI_main\images\xiaoxin.c" />
     <ClCompile Include="GUI_main\images\bear.c" />
+    <ClCompile Include="GUI_main\images\weather\cloud.c" />
+    <ClCompile Include="GUI_main\images\weather\rain.c" />
+    <ClCompile Include="GUI_main\images\weather\sunny.c" />
+    <ClCompile Include="GUI_main\images\weather\weather.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />

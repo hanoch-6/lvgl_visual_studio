@@ -1,0 +1,13 @@
+<mxfile host="65bd71144e">
+    <diagram id="-paHRhi-PAPvwVaLpc4E" name="第 1 页">
+        <mxGraphModel dx="463" dy="324" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="8" value="&lt;ul&gt;&lt;li&gt;开机界面UI：weclome to my channel，显示我的制作信息&lt;/li&gt;&lt;/ul&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="280" y="30" width="200" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
