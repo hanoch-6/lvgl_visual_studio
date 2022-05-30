@@ -7,7 +7,7 @@
 *      INCLUDES
 *********************/
 #include "gui.h"
-
+#include "stdio.h"
 #include "lvgl/lvgl.h"
 #include "lv_conf.h"
 
@@ -23,16 +23,14 @@
 /**********************
 *  STATIC PROTOTYPES
 **********************/
-static void start_gif_create();
-static void scroll_creatorInfo_create();
-static void weather_sys_create();
-
-static void startup_timer(lv_timer_t* timer);
+static lv_obj_t* start_anim_create(lv_obj_t* parent);
+static lv_obj_t* menu_create(lv_obj_t* parent);
+static void auto_step_cb(lv_timer_t* timer);
 static void screen_clean_up(void* scr);
 /**********************
 *  STATIC VARIABLES
 **********************/
-
+lv_obj_t* start_ui;
 /**********************
 *      MACROS
 **********************/
@@ -43,34 +41,35 @@ static void screen_clean_up(void* scr);
 
 void gui_start(void)
 {
-    start_gif_create();
-    scroll_creatorInfo_create();
-    lv_timer_t* timer = lv_timer_create(startup_timer, 1000, NULL);
+    lv_obj_t* backup = start_anim_create(lv_scr_act());
+    lv_timer_t* timer = lv_timer_create(auto_step_cb, 1000, NULL);
     lv_timer_set_repeat_count(timer, 5);
 }
 /**********************
 *   STATIC FUNCTIONS
 **********************/
-static void start_gif_create(void)
+static lv_obj_t* start_anim_create(lv_obj_t* parent)
 {
     LV_IMG_DECLARE(xiaoxin);
 
-    lv_obj_t* start_gif = lv_gif_create(lv_scr_act());
-    lv_gif_set_src(start_gif, &xiaoxin);
-    lv_obj_align(start_gif, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_t* cont= lv_obj_create(parent);
+    lv_obj_set_height(cont, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(cont, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-}
-static void scroll_creatorInfo_create()
-{
-    lv_obj_t* Info = lv_label_create(lv_scr_act());
-    lv_label_set_long_mode(Info, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_obj_set_width(Info, 150);
-    lv_label_set_text(Info, "Creator:Hanoch&小新, 三年2班\nLVGL version:8.3");
-    lv_obj_align(Info, LV_ALIGN_BOTTOM_MID, 0, -HOR_STEP);
-    //lv_async_call(screen_clean_up, Info);
+    lv_obj_t* gif_xiaoxin = lv_gif_create(cont);
+    lv_gif_set_src(gif_xiaoxin, &xiaoxin);
+    lv_obj_align(gif_xiaoxin, LV_ALIGN_CENTER, 0, 0);
 
+    lv_obj_t* scroll_Info = lv_label_create(cont);
+    lv_label_set_long_mode(scroll_Info, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(scroll_Info, 180);
+    lv_label_set_text(scroll_Info, "Hanoch&小新, 三年2班\nLVGL version:8.3");
+    lv_obj_align(scroll_Info, LV_ALIGN_BOTTOM_MID, 0, -HOR_STEP);
+    
+    return cont;
 }
-static void menu_create(void)
+static lv_obj_t* menu_create(lv_obj_t* parent)
 {
     LV_IMG_DECLARE(sunny);
     printf("menu create\n");
@@ -78,16 +77,30 @@ static void menu_create(void)
     lv_img_set_src(weather_obj, &sunny);
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 }
-static void startup_timer(lv_timer_t* timer)
+static void auto_step_cb(lv_timer_t* timer)
 {
-    if (timer->repeat_count == 0)
+    static uint32_t state = 0;
+    printf("state = %d\n", state);
+
+    switch (state)
     {
-        lv_async_call(screen_clean_up, lv_scr_act());
+        case 5:
+        {
+
+        }
+        break;
+        case 6:
+        {
+
+        }
+        break;
+        default :
+        break;
     }
 }
 static void screen_clean_up(void* scr)
 {
     printf("clean up the screen\n");
     lv_obj_clean(scr);
-    menu_create();
+    //menu_create();
 }
