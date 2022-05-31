@@ -61,7 +61,7 @@ static lv_obj_t* start_anim_create(lv_obj_t* parent)
     //lv_obj_set_flex_flow(cont, LV_FLEX_FLOW_COLUMN);
 
     lv_obj_set_size(cont, LV_HOR_RES, LV_VER_RES);
-    lv_obj_set_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_align(cont, LV_FLEX_ALIGN_CENTER);
 
     lv_obj_t* gif_xiaoxin = lv_gif_create(cont);
     lv_gif_set_src(gif_xiaoxin, &xiaoxin);
@@ -82,7 +82,7 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_t* weather_obj = lv_gif_create(parent);
     lv_obj_set_height(weather_obj, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(weather_obj, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_START);
     lv_gif_set_src(weather_obj, &weather);
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 
@@ -97,12 +97,18 @@ static void auto_step_cb(lv_timer_t* timer)
     {
         case 0:
         {
-            backup = start_anim_create(start_anim_obj);
+            //lv_obj_t* obj = lv_obj_get_child()
+            //backup = start_anim_create(start_anim_obj);
+        }
+        break;
+        case 4:
+        {
+            screen_clean_up(start_anim_obj);
         }
         break;
         case 5:
         {
-            backup = menu_create(start_anim_obj);
+            backup = menu_create(menu_obj);
         }
         break;
         default :
@@ -113,6 +119,6 @@ static void auto_step_cb(lv_timer_t* timer)
 static void screen_clean_up(void* scr)
 {
     printf("clean up the screen\n");
-    lv_obj_clean(scr);
+    lv_obj_del_delayed(scr,500);
     //menu_create();
 }
