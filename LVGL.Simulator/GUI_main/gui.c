@@ -121,26 +121,34 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
  * @brief data 传进帧数据
  * @return 
 */
-static lv_obj_t* weather_windows_create()
+static lv_obj_t* weather_windows_create(lv_obj_t* parent)
 {
-    lv_obj_t* cont;
-    lv_obj_t* weather_condition;
-    lv_obj_t* location;
-    lv_obj_t* temperature;
-    lv_obj_t* current_date;
-    lv_obj_t* astronaut_img;
-    lv_obj_t* air_quality;
+    lv_obj_t* cont = lv_obj_create(parent);
+    lv_obj_t* weather_condition = lv_obj_create(cont);
+    lv_obj_t* location = lv_obj_create(cont);
+    lv_obj_t* temperature = lv_obj_create(cont);
+    lv_obj_t* current_date = lv_obj_create(cont);
+    lv_obj_t* astronaut_img = lv_obj_create(cont);
+    lv_obj_t* air_quality = lv_obj_create(cont);
 
     lv_obj_set_size(cont, LV_HOR_RES, LV_VER_RES);
-    lv_obj_set_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_center(cont);
+    static const lv_coord_t grid_cols[] = { 80,80,80, LV_GRID_TEMPLATE_LAST };
+    static lv_coord_t grid_rows[] = { 50,50,50,LV_GRID_TEMPLATE_LAST };
 
+    for (uint8_t i = 0; i < lv_obj_get_child_cnt(cont); i++)
+    {
+        lv_obj_t* child = lv_obj_get_child(cont, i);
+        lv_obj_remove_style_all(child);
+    }
     lv_obj_set_grid_dsc_array(cont, grid_cols, grid_rows);
     lv_obj_set_style_grid_row_align(cont, LV_GRID_ALIGN_SPACE_BETWEEN, 0);
-    lv_obj_set_grid_cell(spectrum_obj, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-    lv_obj_set_grid_cell(title_box, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 2, 1);
-    lv_obj_set_grid_cell(icon_box, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 4, 1);
-    lv_obj_set_grid_cell(ctrl_box, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
-    lv_obj_set_grid_cell(handle_box, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
+    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 0, 1,LV_GRID_ALIGN_START, 0, 1);
+    lv_obj_t* label = lv_label_create(l)
+    //lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 2, 1);
+    //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 4, 1);
+    //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
+    //lv_obj_set_grid_cell(air_quality, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
 }
 static void auto_step_cb(lv_timer_t* timer)
 {
