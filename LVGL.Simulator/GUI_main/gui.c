@@ -92,8 +92,12 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_t* weather_obj = lv_gif_create(cont);
     lv_obj_set_height(weather_obj, LV_SIZE_CONTENT);
 <<<<<<< HEAD
+<<<<<<< HEAD
     lv_obj_set_flex_flow(weather_obj, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_START);
+=======
+    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+>>>>>>> 1c867e2ad7e86818676f402707a66bdb7eba9485
 =======
     lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 >>>>>>> 1c867e2ad7e86818676f402707a66bdb7eba9485
@@ -176,8 +180,11 @@ static void auto_step_cb(lv_timer_t* timer)
         case 5:
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
             backup = menu_create(menu_obj);
 =======
+=======
+>>>>>>> 1c867e2ad7e86818676f402707a66bdb7eba9485
             printf("删除gif\n");
             lv_obj_t* child = lv_obj_get_child(start_anim_obj, 0);
             lv_obj_del(child);
@@ -185,6 +192,9 @@ static void auto_step_cb(lv_timer_t* timer)
         case 10:
         {
             menu_create(start_anim_obj);
+<<<<<<< HEAD
+>>>>>>> 1c867e2ad7e86818676f402707a66bdb7eba9485
+=======
 >>>>>>> 1c867e2ad7e86818676f402707a66bdb7eba9485
         }
         break;
