@@ -27,13 +27,14 @@ static lv_obj_t* start_anim_create(lv_obj_t* parent);
 static lv_obj_t* menu_create(lv_obj_t* parent);
 static void auto_step_cb(lv_timer_t* timer);
 static void screen_clean_up(void* scr);
+static void menu_btn_event_handler(lv_event_t* e);
 /**********************
 *  STATIC VARIABLES
 **********************/
 static lv_obj_t* start_anim_obj;
 static lv_obj_t* menu_obj;
 static uint32_t track_id;
-lv_timer_t* timer;
+lv_timer_t* Autoplay_timer;
 lv_obj_t* backup;
 /**********************
 *      MACROS
@@ -49,11 +50,17 @@ void gui_start(void)
 
     start_anim_obj = lv_scr_act();
     menu_obj = lv_scr_act();
-    timer = lv_timer_create(auto_step_cb, 1000, NULL);
+    Autoplay_timer = lv_timer_create(auto_step_cb, 1000, NULL);
 }
 /**********************
 *   STATIC FUNCTIONS
 **********************/
+
+static void menu_btn_event_handler(lv_event_t* e)
+{
+    printf("wnisfhj\n");
+}
+
 static lv_obj_t* start_anim_create(lv_obj_t* parent)
 {
     LV_IMG_DECLARE(xiaoxin);
@@ -95,14 +102,14 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_set_flex_flow(weather_obj, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_START);
 
-    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER);
 
-    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_align(weather_obj, LV_FLEX_ALIGN_CENTER);
     lv_gif_set_src(weather_obj, &weather);
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t* weather_btn = lv_btn_create(cont);
-    //lv_obj_add_event_cb(weather_btn, weather_event_handler, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(weather_btn, menu_btn_event_handler, LV_EVENT_ALL, NULL);
     lv_obj_remove_style_all(weather_btn);
     lv_obj_align(weather_btn, LV_ALIGN_BOTTOM_MID, 0, -VER_STEP);
     lv_obj_t* weather_label = lv_label_create(weather_btn);
@@ -150,7 +157,8 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     lv_obj_set_grid_dsc_array(cont, grid_cols, grid_rows);
     lv_obj_set_style_grid_row_align(cont, LV_GRID_ALIGN_SPACE_BETWEEN, 0);
     lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 0, 1,LV_GRID_ALIGN_START, 0, 1);
-    lv_obj_t* label = lv_label_create(l)
+    lv_obj_t* label = lv_label_create(weather_condition);
+    lv_label_set_text(label, "天气情况");
     //lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 2, 1);
     //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 4, 1);
     //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
@@ -165,28 +173,19 @@ static void auto_step_cb(lv_timer_t* timer)
     {
         case 0:
         {
-            //lv_obj_t* obj = lv_obj_get_child()
-            //backup = start_anim_create(start_anim_obj);
-        }
-        break;
-        case 4:
-        {
-            screen_clean_up(start_anim_obj);
+            backup = start_anim_create(start_anim_obj);
         }
         break;
         case 5:
         {
 
-            backup = menu_create(menu_obj);
-
-
             printf("删除gif\n");
             lv_obj_t* child = lv_obj_get_child(start_anim_obj, 0);
             lv_obj_del(child);
+            menu_create(start_anim_obj);
         }
         case 10:
         {
-            menu_create(start_anim_obj);
 
         }
         break;

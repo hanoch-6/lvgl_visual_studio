@@ -108,7 +108,7 @@ int main()
     //lv_demo_widgets();           // ok
      //lv_demo_benchmark();
      //lv_demo_keypad_encoder();    // ok
-     lv_demo_music();             // removed from repository
+     //lv_demo_music();             // removed from repository
     // lv_demo_printer();           // removed from repository
     // lv_demo_stress();            // ok
 
