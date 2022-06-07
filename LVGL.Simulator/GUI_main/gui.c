@@ -19,12 +19,16 @@
 /**********************
 *      TYPEDEFS
 **********************/
-
+typedef enum btn_menu_t
+{
+    WEATHER_BTN,
+}btn_menu;
 /**********************
 *  STATIC PROTOTYPES
 **********************/
 static lv_obj_t* start_anim_create(lv_obj_t* parent);
 static lv_obj_t* menu_create(lv_obj_t* parent);
+static lv_obj_t* weather_windows_create(lv_obj_t* parent);
 static void auto_step_cb(lv_timer_t* timer);
 static void screen_clean_up(void* scr);
 static void menu_btn_event_handler(lv_event_t* e);
@@ -59,15 +63,18 @@ static void menu_btn_event_handler(lv_event_t* e)
 {
     uint8_t event_code = lv_event_get_code(e);
     uint16_t* user_data = lv_event_get_user_data(e);
-    printf("event code = %d\n" ,event_code);
-    //int *event_para = e->param;
-    printf("event_para = %d\n" ,user_data);
+    //printf("event code = %d\n" ,event_code);
+    //printf("event_para = %d\n" ,user_data);
 
     switch (event_code)
     {
     case LV_EVENT_RELEASED:
     {
-        printf("event code = %d\n",event_code);
+        if (user_data == 0)
+        {
+            lv_obj_del(backup);
+            weather_windows_create(menu_obj);
+        }
     }
     break;
     }
@@ -120,10 +127,7 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t* weather_btn = lv_btn_create(cont);
-    int para = 12;
-    printf("para = %d\n", &para);
-    lv_obj_add_event_cb(weather_btn, menu_btn_event_handler, LV_EVENT_RELEASED, para);
-    //lv_event_send(weather_btn, LV_EVENT_ALL, &para);
+    lv_obj_add_event_cb(weather_btn, menu_btn_event_handler, LV_EVENT_RELEASED, WEATHER_BTN);
     lv_obj_remove_style_all(weather_btn);
     lv_obj_align(weather_btn, LV_ALIGN_BOTTOM_MID, 0, -VER_STEP);
     lv_obj_t* weather_label = lv_label_create(weather_btn);
@@ -151,7 +155,7 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
 static lv_obj_t* weather_windows_create(lv_obj_t* parent)
 {
     lv_obj_t* cont = lv_obj_create(parent);
-    lv_obj_t* weather_condition = lv_obj_create(cont);
+
     lv_obj_t* location = lv_obj_create(cont);
     lv_obj_t* temperature = lv_obj_create(cont);
     lv_obj_t* current_date = lv_obj_create(cont);
@@ -170,13 +174,21 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     }
     lv_obj_set_grid_dsc_array(cont, grid_cols, grid_rows);
     lv_obj_set_style_grid_row_align(cont, LV_GRID_ALIGN_SPACE_BETWEEN, 0);
-    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 0, 1,LV_GRID_ALIGN_START, 0, 1);
-    lv_obj_t* label = lv_label_create(weather_condition);
-    lv_label_set_text(label, "天气情况");
+
+    //TODO 天气数据传入。
+    LV_IMG_DECLARE(rain);
+    lv_obj_t* weather_condition = lv_gif_create(cont);
+    lv_gif_set_src(weather_condition, &rain);
+    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 0, 3, LV_GRID_ALIGN_START, 0, 1);
+
+    //lv_obj_t* label = lv_label_create(weather_condition);
+    //lv_label_set_text(label, "天气:");
+    
     //lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 2, 1);
     //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 4, 1);
     //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
     //lv_obj_set_grid_cell(air_quality, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
+    return cont;
 }
 static void auto_step_cb(lv_timer_t* timer)
 {
@@ -196,7 +208,7 @@ static void auto_step_cb(lv_timer_t* timer)
             printf("删除gif\n");
             lv_obj_t* child = lv_obj_get_child(start_anim_obj, 0);
             lv_obj_del(child);
-            menu_create(start_anim_obj);
+            backup = menu_create(menu_obj);
         }
         case 10:
         {
