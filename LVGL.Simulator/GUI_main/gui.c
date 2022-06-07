@@ -47,7 +47,6 @@ lv_obj_t* backup;
 void gui_start(void)
 {
     lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x343247), 0);
-
     start_anim_obj = lv_scr_act();
     menu_obj = lv_scr_act();
     Autoplay_timer = lv_timer_create(auto_step_cb, 1000, NULL);
@@ -58,13 +57,25 @@ void gui_start(void)
 
 static void menu_btn_event_handler(lv_event_t* e)
 {
-    printf("wnisfhj\n");
+    uint8_t event_code = lv_event_get_code(e);
+    uint16_t* user_data = lv_event_get_user_data(e);
+    printf("event code = %d\n" ,event_code);
+    //int *event_para = e->param;
+    printf("event_para = %d\n" ,user_data);
+
+    switch (event_code)
+    {
+    case LV_EVENT_RELEASED:
+    {
+        printf("event code = %d\n",event_code);
+    }
+    break;
+    }
 }
 
 static lv_obj_t* start_anim_create(lv_obj_t* parent)
 {
     LV_IMG_DECLARE(xiaoxin);
-
     printf("start anim create\n");
     lv_obj_t* cont= lv_obj_create(parent);
     //TODO 设置上下滑动
@@ -93,7 +104,7 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
 
     lv_obj_t* cont = lv_obj_create(parent);
     lv_obj_set_size(cont, LV_HOR_RES, LV_VER_RES);
-    lv_obj_set_align(cont, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_align(cont, LV_FLEX_ALIGN_CENTER);
 
     //创建weather bar
     lv_obj_t* weather_obj = lv_gif_create(cont);
@@ -109,7 +120,10 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_align(weather_obj, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t* weather_btn = lv_btn_create(cont);
-    lv_obj_add_event_cb(weather_btn, menu_btn_event_handler, LV_EVENT_ALL, NULL);
+    int para = 12;
+    printf("para = %d\n", &para);
+    lv_obj_add_event_cb(weather_btn, menu_btn_event_handler, LV_EVENT_RELEASED, para);
+    //lv_event_send(weather_btn, LV_EVENT_ALL, &para);
     lv_obj_remove_style_all(weather_btn);
     lv_obj_align(weather_btn, LV_ALIGN_BOTTOM_MID, 0, -VER_STEP);
     lv_obj_t* weather_label = lv_label_create(weather_btn);
