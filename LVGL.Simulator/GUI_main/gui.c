@@ -23,6 +23,27 @@ typedef enum btn_menu_t
 {
     WEATHER_BTN,
 }btn_menu;
+
+typedef struct _lv_clock
+{
+    lv_obj_t* time_label; // 时间标签
+    lv_obj_t* date_label; // 日期标签
+    lv_obj_t* weekday_label; // 星期标签
+}lv_clock_t;
+
+struct tm
+{
+    int tm_sec;   // seconds after the minute - [0, 60] including leap second
+    int tm_min;   // minutes after the hour - [0, 59]
+    int tm_hour;  // hours since midnight - [0, 23]
+    int tm_mday;  // day of the month - [1, 31]
+    int tm_mon;   // months since January - [0, 11]
+    int tm_year;  // years since 1900
+    int tm_wday;  // days since Sunday - [0, 6]
+    int tm_yday;  // days since January 1 - [0, 365]
+    int tm_isdst; // daylight savings time flag
+};
+
 /**********************
 *  STATIC PROTOTYPES
 **********************/
@@ -32,12 +53,17 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent);
 static void auto_step_cb(lv_timer_t* timer);
 static void screen_clean_up(void* scr);
 static void menu_btn_event_handler(lv_event_t* e);
+static void clock_create(lv_obj_t* parent);
 /**********************
 *  STATIC VARIABLES
 **********************/
 static lv_obj_t* start_anim_obj;
 static lv_obj_t* menu_obj;
 static uint32_t track_id;
+static lv_obj_t* label_hour;
+static lv_obj_t* label_min;
+static lv_obj_t* label_sec;
+static lv_obj_t* label_dot;
 lv_timer_t* Autoplay_timer;
 lv_obj_t* backup;
 /**********************
@@ -100,6 +126,7 @@ static lv_obj_t* start_anim_create(lv_obj_t* parent)
     lv_label_set_long_mode(scroll_Info, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(scroll_Info, 150);
     lv_label_set_text(scroll_Info, "黄妙之&小新, 三年2班\nLVGL version:8.3");
+
     lv_obj_align(scroll_Info, LV_ALIGN_BOTTOM_MID, 0, -HOR_STEP);
     
     return cont;
@@ -148,6 +175,36 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     //TODO创建photo个人照片
     return cont;
 }
+
+static void clock_create(lv_obj_t* parent)
+{
+    time_t now_time;
+    struct tm* now_date;
+
+    time(&now_time);
+    now_date = localtime(&now_time);
+
+    label_hour = lv_label_create(parent);
+    lv_obj_set_style_text_font(label_hour, &lv_font_montserrat_48, 0);
+    lv_obj_align(label_hour, LV_ALIGN_CENTER, -70, 0);
+    lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
+
+    label_dot = lv_label_create(parent);
+    lv_obj_set_style_text_font(label_dot, &lv_font_montserrat_48, 0);
+    lv_obj_align(label_dot, LV_ALIGN_CENTER, -25, -3);
+    lv_label_set_text(label_dot, ":");
+
+    label_min = lv_label_create(parent);
+    lv_obj_set_style_text_font(label_min, &lv_font_montserrat_48, 0);
+    lv_obj_align(label_min, LV_ALIGN_CENTER, 20, 0);
+    lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
+
+    label_sec = lv_label_create(parent);
+    lv_obj_set_style_text_font(label_sec, &lv_font_montserrat_24, 0);
+    lv_obj_align(label_sec, LV_ALIGN_CENTER, 75, 8);
+    lv_label_set_text_fmt(label_sec, "%02d", now_date->tm_sec);
+}
+
 /**
  * @brief data 传进帧数据
  * @return 
@@ -155,17 +212,15 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
 static lv_obj_t* weather_windows_create(lv_obj_t* parent)
 {
     lv_obj_t* cont = lv_obj_create(parent);
+    lv_obj_set_style_bg_color(cont, lv_color_hex(0x00BFFF), 0);
 
-    lv_obj_t* location = lv_obj_create(cont);
-    lv_obj_t* temperature = lv_obj_create(cont);
-    lv_obj_t* current_date = lv_obj_create(cont);
     lv_obj_t* astronaut_img = lv_obj_create(cont);
     lv_obj_t* air_quality = lv_obj_create(cont);
 
     lv_obj_set_size(cont, LV_HOR_RES, LV_VER_RES);
     lv_obj_center(cont);
     static const lv_coord_t grid_cols[] = { 80,80,80, LV_GRID_TEMPLATE_LAST };
-    static lv_coord_t grid_rows[] = { 50,50,50,LV_GRID_TEMPLATE_LAST };
+    static lv_coord_t grid_rows[] = { 80,80,80,LV_GRID_TEMPLATE_LAST };
 
     for (uint8_t i = 0; i < lv_obj_get_child_cnt(cont); i++)
     {
@@ -175,17 +230,44 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     lv_obj_set_grid_dsc_array(cont, grid_cols, grid_rows);
     lv_obj_set_style_grid_row_align(cont, LV_GRID_ALIGN_SPACE_BETWEEN, 0);
 
-    //TODO 天气数据传入。
+    //TODO 城市信息传入，字体大小更改
+    lv_obj_t* location = lv_label_create(cont);
+    lv_obj_set_size(location, 80, 80);
+    lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1,
+                                   LV_GRID_ALIGN_STRETCH, 0, 1);
+    //lv_obj_t* label_city = lv_label_create(location);
+    lv_label_set_text(location, "重庆");
+    
+
+    //TODO 天气数据传入。选择rain,sunny,big_sunny,clouds
+    //TODO 修改天气图片大小，如果有需要可以创建一个容器，但是容器可能回留有缝隙，不美观
     LV_IMG_DECLARE(rain);
     lv_obj_t* weather_condition = lv_gif_create(cont);
+    lv_obj_set_size(weather_condition, 120, 120);
+    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 1, 1,
+                                            LV_GRID_ALIGN_START, 0, 1);
+    //lv_obj_t* weather_condition_gif = lv_gif_create(weather_condition);
     lv_gif_set_src(weather_condition, &rain);
-    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 0, 3, LV_GRID_ALIGN_START, 0, 1);
+
+    //TODO 时间参数传入。
+    clock_create(cont);
+    lv_obj_set_size(current_time, 80, 80);
+    lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_STRETCH, 1, 2,
+                                       LV_GRID_ALIGN_STRETCH, 1, 1);
+    //TODO 创建时钟
+    lv_label_set_text(current_time, "23:15");
+
 
     //lv_obj_t* label = lv_label_create(weather_condition);
-    //lv_label_set_text(label, "天气:");
+    //lv_obj_t* temperature = lv_label_create(cont);
+    //lv_label_set_long_mode(temperature, LV_LABEL_LONG_WRAP);
+    //lv_label_set_recolor(temperature, true);
+    //lv_label_set_text(temperature, "25度");
+    //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 4, 1);
+    //lv_obj_align(temperature, LV_ALIGN_CENTER, 0, -40);
+
+
     
-    //lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 2, 1);
-    //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 4, 1);
     //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
     //lv_obj_set_grid_cell(air_quality, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
     return cont;
