@@ -16,6 +16,47 @@
 *********************/
 #define HOR_STEP 40
 #define VER_STEP 40
+
+LV_IMG_DECLARE(img_sunny);
+LV_IMG_DECLARE(img_clear);
+LV_IMG_DECLARE(img_fair_day);
+LV_IMG_DECLARE(img_fair_night);
+LV_IMG_DECLARE(img_cloudy);
+LV_IMG_DECLARE(img_partly_cloudy_day);
+LV_IMG_DECLARE(img_partly_cloudy_night);
+LV_IMG_DECLARE(img_mostly_cloudy_day);
+LV_IMG_DECLARE(img_mostly_cloudy_night);
+LV_IMG_DECLARE(img_overcast);
+LV_IMG_DECLARE(img_shower);
+LV_IMG_DECLARE(img_thundershower);
+LV_IMG_DECLARE(img_thundershower_with_hail);
+LV_IMG_DECLARE(img_light_rain);
+LV_IMG_DECLARE(img_moderate_rain);
+LV_IMG_DECLARE(img_heavy_rain);
+LV_IMG_DECLARE(img_storm);
+LV_IMG_DECLARE(img_heavy_storm);
+LV_IMG_DECLARE(img_severe_storm);
+LV_IMG_DECLARE(img_ice_rain);
+LV_IMG_DECLARE(img_sleet);
+LV_IMG_DECLARE(img_snow_flurry);
+LV_IMG_DECLARE(img_light_snow);
+LV_IMG_DECLARE(img_moderate_snow);
+LV_IMG_DECLARE(img_heavy_snow);
+LV_IMG_DECLARE(img_snowstorm);
+LV_IMG_DECLARE(img_dust);
+LV_IMG_DECLARE(img_sand);
+LV_IMG_DECLARE(img_duststorm);
+LV_IMG_DECLARE(img_sandstorm);
+LV_IMG_DECLARE(img_foggy);
+LV_IMG_DECLARE(img_haze);
+LV_IMG_DECLARE(img_windy);
+LV_IMG_DECLARE(img_blustery);
+LV_IMG_DECLARE(img_hurricance);
+LV_IMG_DECLARE(img_tropical_storm);
+LV_IMG_DECLARE(img_tornado);
+LV_IMG_DECLARE(img_cold);
+LV_IMG_DECLARE(img_hot);
+LV_IMG_DECLARE(img_unknown);
 /**********************
 *      TYPEDEFS
 **********************/
@@ -24,25 +65,49 @@ typedef enum btn_menu_t
     WEATHER_BTN,
 }btn_menu;
 
-typedef struct _lv_clock
-{
-    lv_obj_t* time_label; // 时间标签
-    lv_obj_t* date_label; // 日期标签
-    lv_obj_t* weekday_label; // 星期标签
-}lv_clock_t;
-
-struct tm
-{
-    int tm_sec;   // seconds after the minute - [0, 60] including leap second
-    int tm_min;   // minutes after the hour - [0, 59]
-    int tm_hour;  // hours since midnight - [0, 23]
-    int tm_mday;  // day of the month - [1, 31]
-    int tm_mon;   // months since January - [0, 11]
-    int tm_year;  // years since 1900
-    int tm_wday;  // days since Sunday - [0, 6]
-    int tm_yday;  // days since January 1 - [0, 365]
-    int tm_isdst; // daylight savings time flag
+static void* weather_table[] = {
+    &img_sunny,                   // 0 晴（国内城市白天晴）
+    &img_clear,                   // 1 晴（国内城市夜晚晴）
+    &img_fair_day,                // 2 晴（国外城市白天晴）
+    &img_fair_night,              // 3 晴（国外城市夜晚晴）
+    &img_cloudy,                  // 4 多云
+    &img_partly_cloudy_day,       // 5 晴间多云
+    &img_partly_cloudy_night,     // 6 晴间多云
+    &img_mostly_cloudy_day,       // 7 大部多云
+    &img_mostly_cloudy_night,     // 8 大部多云
+    &img_overcast,                // 9 阴
+    &img_shower,                  // 10 阵雨
+    &img_thundershower,           // 11 雷阵雨
+    &img_thundershower_with_hail, // 12 雷阵雨伴有冰雹
+    &img_light_rain,              // 13 小雨
+    &img_moderate_rain,           // 14 中雨
+    &img_heavy_rain,              // 15 大雨
+    &img_storm,                   // 16 暴雨
+    &img_heavy_storm,             // 17 大暴雨
+    &img_severe_storm,            // 18 特大暴雨
+    &img_ice_rain,                // 19 冻雨
+    &img_sleet,                   // 20 雨夹雪
+    &img_snow_flurry,             // 21 阵雪
+    &img_light_snow,              // 22 小雪
+    &img_moderate_snow,           // 23 中雪
+    &img_heavy_snow,              // 24 大雪
+    &img_snowstorm,               // 25 暴雪
+    &img_dust,                    // 26 浮尘
+    &img_sand,                    // 27 扬沙
+    &img_duststorm,               // 28 沙尘暴
+    &img_sandstorm,               // 29 强沙尘暴
+    &img_foggy,                   // 30 雾
+    &img_haze,                    // 31 霾
+    &img_windy,                   // 32 风
+    &img_blustery,                // 33 大风
+    &img_hurricance,              // 34 飓风
+    &img_tropical_storm,          // 35 热带风暴
+    &img_tornado,                 // 36 龙卷风
+    &img_cold,                    // 37 冷
+    &img_hot,                     // 38 热
+    &img_unknown,                 // 99 N/A
 };
+
 
 /**********************
 *  STATIC PROTOTYPES
@@ -64,6 +129,8 @@ static lv_obj_t* label_hour;
 static lv_obj_t* label_min;
 static lv_obj_t* label_sec;
 static lv_obj_t* label_dot;
+
+static lv_font_t* font_normal;
 lv_timer_t* Autoplay_timer;
 lv_obj_t* backup;
 /**********************
@@ -76,7 +143,9 @@ lv_obj_t* backup;
 
 void gui_start(void)
 {
-    lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x343247), 0);
+    font_normal = &lv_font_montserrat_14;
+    lv_theme_default_init(NULL, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), LV_THEME_DEFAULT_DARK, font_normal);
+    //lv_obj_set_style_bg_color(lv_scr_act(), lv_color_hex(0x343247), 0);
     start_anim_obj = lv_scr_act();
     menu_obj = lv_scr_act();
     Autoplay_timer = lv_timer_create(auto_step_cb, 1000, NULL);
@@ -178,31 +247,31 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
 
 static void clock_create(lv_obj_t* parent)
 {
-    time_t now_time;
-    struct tm* now_date;
+    //time_t now_time;
+    //struct tm* now_date;
 
-    time(&now_time);
-    now_date = localtime(&now_time);
+    //time(&now_time);
+    //now_date = localtime(&now_time);
 
-    label_hour = lv_label_create(parent);
-    lv_obj_set_style_text_font(label_hour, &lv_font_montserrat_48, 0);
-    lv_obj_align(label_hour, LV_ALIGN_CENTER, -70, 0);
-    lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
+    //label_hour = lv_label_create(parent);
+    //lv_obj_set_style_text_font(label_hour, &lv_font_montserrat_48, 0);
+    //lv_obj_align(label_hour, LV_ALIGN_CENTER, -70, 0);
+    //lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
 
-    label_dot = lv_label_create(parent);
-    lv_obj_set_style_text_font(label_dot, &lv_font_montserrat_48, 0);
-    lv_obj_align(label_dot, LV_ALIGN_CENTER, -25, -3);
-    lv_label_set_text(label_dot, ":");
+    //label_dot = lv_label_create(parent);
+    //lv_obj_set_style_text_font(label_dot, &lv_font_montserrat_48, 0);
+    //lv_obj_align(label_dot, LV_ALIGN_CENTER, -25, -3);
+    //lv_label_set_text(label_dot, ":");
 
-    label_min = lv_label_create(parent);
-    lv_obj_set_style_text_font(label_min, &lv_font_montserrat_48, 0);
-    lv_obj_align(label_min, LV_ALIGN_CENTER, 20, 0);
-    lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
+    //label_min = lv_label_create(parent);
+    //lv_obj_set_style_text_font(label_min, &lv_font_montserrat_48, 0);
+    //lv_obj_align(label_min, LV_ALIGN_CENTER, 20, 0);
+    //lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
 
-    label_sec = lv_label_create(parent);
-    lv_obj_set_style_text_font(label_sec, &lv_font_montserrat_24, 0);
-    lv_obj_align(label_sec, LV_ALIGN_CENTER, 75, 8);
-    lv_label_set_text_fmt(label_sec, "%02d", now_date->tm_sec);
+    //label_sec = lv_label_create(parent);
+    //lv_obj_set_style_text_font(label_sec, &lv_font_montserrat_24, 0);
+    //lv_obj_align(label_sec, LV_ALIGN_CENTER, 75, 8);
+    //lv_label_set_text_fmt(label_sec, "%02d", now_date->tm_sec);
 }
 
 /**
@@ -237,26 +306,24 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
                                    LV_GRID_ALIGN_STRETCH, 0, 1);
     //lv_obj_t* label_city = lv_label_create(location);
     lv_label_set_text(location, "重庆");
-    
 
     //TODO 天气数据传入。选择rain,sunny,big_sunny,clouds
     //TODO 修改天气图片大小，如果有需要可以创建一个容器，但是容器可能回留有缝隙，不美观
-    LV_IMG_DECLARE(rain);
     lv_obj_t* weather_condition = lv_gif_create(cont);
     lv_obj_set_size(weather_condition, 120, 120);
     lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 1, 1,
                                             LV_GRID_ALIGN_START, 0, 1);
     //lv_obj_t* weather_condition_gif = lv_gif_create(weather_condition);
-    lv_gif_set_src(weather_condition, &rain);
+    lv_img_set_src(weather_condition, weather_table[20]);
 
     //TODO 时间参数传入。
-    clock_create(cont);
+    //clock_create(cont);
+    lv_obj_t* current_time = lv_obj_create(cont);
     lv_obj_set_size(current_time, 80, 80);
     lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_STRETCH, 1, 2,
                                        LV_GRID_ALIGN_STRETCH, 1, 1);
     //TODO 创建时钟
     lv_label_set_text(current_time, "23:15");
-
 
     //lv_obj_t* label = lv_label_create(weather_condition);
     //lv_obj_t* temperature = lv_label_create(cont);
@@ -266,8 +333,6 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 4, 1);
     //lv_obj_align(temperature, LV_ALIGN_CENTER, 0, -40);
 
-
-    
     //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
     //lv_obj_set_grid_cell(air_quality, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
     return cont;
