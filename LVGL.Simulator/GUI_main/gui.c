@@ -11,12 +11,14 @@
 #include "lvgl/lvgl.h"
 #include "lv_conf.h"
 
+#include <time.h>
 /*********************
 *      DEFINES
 *********************/
 #define HOR_STEP 40
 #define VER_STEP 40
 
+#define MAX_WEATHER_CODE 38；
 LV_IMG_DECLARE(img_sunny);
 LV_IMG_DECLARE(img_clear);
 LV_IMG_DECLARE(img_fair_day);
@@ -247,31 +249,28 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
 
 static void clock_create(lv_obj_t* parent)
 {
-    //time_t now_time;
-    //struct tm* now_date;
+    static struct tm last_date;
+    time_t now_time;
+    struct tm *now_date;
 
-    //time(&now_time);
-    //now_date = localtime(&now_time);
+    static uint8_t toggle;
 
-    //label_hour = lv_label_create(parent);
-    //lv_obj_set_style_text_font(label_hour, &lv_font_montserrat_48, 0);
-    //lv_obj_align(label_hour, LV_ALIGN_CENTER, -70, 0);
-    //lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
+    time(&now_time);
 
-    //label_dot = lv_label_create(parent);
-    //lv_obj_set_style_text_font(label_dot, &lv_font_montserrat_48, 0);
-    //lv_obj_align(label_dot, LV_ALIGN_CENTER, -25, -3);
-    //lv_label_set_text(label_dot, ":");
+    now_date = localtime(&now_time);
 
-    //label_min = lv_label_create(parent);
-    //lv_obj_set_style_text_font(label_min, &lv_font_montserrat_48, 0);
-    //lv_obj_align(label_min, LV_ALIGN_CENTER, 20, 0);
-    //lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
+    if (now_date->tm_hour != last_date.tm_hour)
+    {
+        lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
+    }
 
-    //label_sec = lv_label_create(parent);
-    //lv_obj_set_style_text_font(label_sec, &lv_font_montserrat_24, 0);
-    //lv_obj_align(label_sec, LV_ALIGN_CENTER, 75, 8);
-    //lv_label_set_text_fmt(label_sec, "%02d", now_date->tm_sec);
+    if (now_date->tm_min != last_date.tm_min)
+    {
+        if (now_date->tm_min != last_date.tm_min)
+        {
+            lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
+        }
+    }
 }
 
 /**
