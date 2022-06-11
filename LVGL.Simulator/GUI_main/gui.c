@@ -67,6 +67,14 @@ typedef enum btn_menu_t
     WEATHER_BTN,
 }btn_menu;
 
+typedef struct _lv_clock
+{
+    lv_obj_t* time_label; // 时间标签
+    lv_obj_t* date_label; // 日期标签
+    lv_obj_t* weekday_label; // 星期标签
+}lv_clock_t;
+
+
 static void* weather_table[] = {
     &img_sunny,                   // 0 晴（国内城市白天晴）
     &img_clear,                   // 1 晴（国内城市夜晚晴）
@@ -112,15 +120,17 @@ static void* weather_table[] = {
 
 
 /**********************
-*  STATIC PROTOTYPES
+*  STATIC PROTOTYPES 
 **********************/
 static lv_obj_t* start_anim_create(lv_obj_t* parent);
 static lv_obj_t* menu_create(lv_obj_t* parent);
 static lv_obj_t* weather_windows_create(lv_obj_t* parent);
+static lv_obj_t* slider_create(lv_obj_t* parent);
+static lv_obj_t* clock_create(lv_obj_t* parent);
 static void auto_step_cb(lv_timer_t* timer);
+static void clock_date_task_callback(lv_timer_t* timer);
 static void screen_clean_up(void* scr);
 static void menu_btn_event_handler(lv_event_t* e);
-static void clock_create(lv_obj_t* parent);
 /**********************
 *  STATIC VARIABLES
 **********************/
@@ -131,7 +141,7 @@ static lv_obj_t* label_hour;
 static lv_obj_t* label_min;
 static lv_obj_t* label_sec;
 static lv_obj_t* label_dot;
-
+static lv_obj_t* room_temperature_slider_label;
 static lv_font_t* font_normal;
 lv_timer_t* Autoplay_timer;
 lv_obj_t* backup;
@@ -155,21 +165,54 @@ void gui_start(void)
 /**********************
 *   STATIC FUNCTIONS
 **********************/
+static void temperature_slider_event_cb(lv_event_t* e)
+{
+    lv_obj_t* slider = lv_event_get_target(e);
+    char buf[8];
+    lv_snprintf(buf, sizeof(buf), "%d%%", lv_slider_get_value(slider));
+    lv_label_set_text(room_temperature_slider_label, buf);
+    lv_obj_align_to(room_temperature_slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+}
+
+
+static void clock_date_task_callback(lv_timer_t* timer)
+{
+    static time_t unix_time;
+    static struct tm* time_info;
+
+    unix_time = time(NULL);
+    time_info = localtime(&unix_time);
+
+    int year = time_info->tm_year + 1900;
+    int month = time_info->tm_mon + 1;
+    int day = time_info->tm_mday;
+    int hour = time_info->tm_hour;
+    int minutes = time_info->tm_min;
+    int second = time_info->tm_sec;
+
+    if (timer != NULL && timer->user_data != NULL)
+    {
+        lv_clock_t* clock = (lv_clock_t*)(timer->user_data);
+        if (clock->time_label != NULL)
+        {
+            lv_label_set_text_fmt(clock->time_label, "%02d:%02d:%02d", hour, minutes, second);
+            lv_obj_align_to(clock->time_label, lv_obj_get_parent(clock->time_label), LV_ALIGN_CENTER, 0, 0);
+        }
+    }
+}
 
 static void menu_btn_event_handler(lv_event_t* e)
 {
     uint8_t event_code = lv_event_get_code(e);
     uint16_t* user_data = lv_event_get_user_data(e);
-    //printf("event code = %d\n" ,event_code);
-    //printf("event_para = %d\n" ,user_data);
-
+    printf("event_code = %d\n", event_code);
     switch (event_code)
     {
     case LV_EVENT_RELEASED:
     {
         if (user_data == 0)
         {
-            lv_obj_del(backup);
+            //lv_obj_del(backup);
             weather_windows_create(menu_obj);
         }
     }
@@ -230,7 +273,7 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     lv_obj_align(weather_btn, LV_ALIGN_BOTTOM_MID, 0, -VER_STEP);
     lv_obj_t* weather_label = lv_label_create(weather_btn);
     lv_label_set_text(weather_label, "weather");
-    lv_obj_center(weather_label);
+
 
     //TODO创建media播放器
     
@@ -247,32 +290,32 @@ static lv_obj_t* menu_create(lv_obj_t* parent)
     return cont;
 }
 
-static void clock_create(lv_obj_t* parent)
+static lv_obj_t* clock_create(lv_obj_t* parent)
 {
-    static struct tm last_date;
-    time_t now_time;
-    struct tm *now_date;
-
-    static uint8_t toggle;
-
-    time(&now_time);
-
-    now_date = localtime(&now_time);
-
-    if (now_date->tm_hour != last_date.tm_hour)
+    //创建时间对象
+    static lv_style_t time_style; 
+    static lv_clock_t lv_clock = { 0 };
+    lv_obj_t* time_obj = lv_obj_create(parent);
+    lv_clock.time_label = lv_label_create(time_obj);
+    if (time_obj == NULL)
     {
-        lv_label_set_text_fmt(label_hour, "%2d", now_date->tm_hour);
+        printf("[%s:%d] time_obj create failed\n", __FUNCTION__, __LINE__);
+        return NULL;
     }
+    lv_obj_set_size(time_obj, 120, 80); 
 
-    if (now_date->tm_min != last_date.tm_min)
+    if (lv_clock.time_label == NULL)
     {
-        if (now_date->tm_min != last_date.tm_min)
-        {
-            lv_label_set_text_fmt(label_min, "%02d", now_date->tm_min);
-        }
+        printf("[%s:%d] time_label create failed\n", __FUNCTION__, __LINE__);
+        return NULL;
     }
+    lv_timer_t* task_timer = lv_timer_create(clock_date_task_callback, 200, (void*)&lv_clock);
+    if (task_timer == NULL)
+    {
+        printf("[%s:%d] lv_timer_create failed\n", __FUNCTION__, __LINE__);
+    }
+    return time_obj;
 }
-
 /**
  * @brief data 传进帧数据
  * @return 
@@ -280,14 +323,15 @@ static void clock_create(lv_obj_t* parent)
 static lv_obj_t* weather_windows_create(lv_obj_t* parent)
 {
     lv_obj_t* cont = lv_obj_create(parent);
-    lv_obj_set_style_bg_color(cont, lv_color_hex(0x00BFFF), 0);
+    //lv_obj_set_style_bg_color(cont, lv_color_hex(0x00BFFF), 0);
 
     lv_obj_t* astronaut_img = lv_obj_create(cont);
     lv_obj_t* air_quality = lv_obj_create(cont);
+    lv_obj_t* location_obj = lv_obj_create(cont);
 
     lv_obj_set_size(cont, LV_HOR_RES, LV_VER_RES);
     lv_obj_center(cont);
-    static const lv_coord_t grid_cols[] = { 80,80,80, LV_GRID_TEMPLATE_LAST };
+    static const lv_coord_t grid_cols[] = { 120,120, LV_GRID_TEMPLATE_LAST };
     static lv_coord_t grid_rows[] = { 80,80,80,LV_GRID_TEMPLATE_LAST };
 
     for (uint8_t i = 0; i < lv_obj_get_child_cnt(cont); i++)
@@ -298,42 +342,60 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     lv_obj_set_grid_dsc_array(cont, grid_cols, grid_rows);
     lv_obj_set_style_grid_row_align(cont, LV_GRID_ALIGN_SPACE_BETWEEN, 0);
 
-    //TODO 城市信息传入，字体大小更改
-    lv_obj_t* location = lv_label_create(cont);
-    lv_obj_set_size(location, 80, 80);
-    lv_obj_set_grid_cell(location, LV_GRID_ALIGN_STRETCH, 0, 1,
-                                   LV_GRID_ALIGN_STRETCH, 0, 1);
-    //lv_obj_t* label_city = lv_label_create(location);
-    lv_label_set_text(location, "重庆");
+    //TODO 城市信息传入
+    lv_obj_t* location_label = lv_label_create(location_obj);
+    lv_obj_remove_style_all(location_label);
+    lv_obj_set_size(location_obj, 120, 120);
+    lv_obj_set_grid_cell(location_obj, LV_GRID_ALIGN_STRETCH, 0, 1,
+                                       LV_GRID_ALIGN_STRETCH, 0, 1);
+    lv_label_set_text(location_label, "重庆");
+    lv_obj_set_align(location_label, LV_ALIGN_TOP_MID);
+    //TODO 当前城市温度值传入
+    lv_obj_t* location_temperature_label = lv_label_create(location_obj);
+    lv_obj_remove_style_all(location_temperature_label);
+    lv_label_set_long_mode(location_temperature_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_width(location_temperature_label, 120);
+    lv_obj_set_style_text_font(location_temperature_label, &lv_font_montserrat_16,0);
+    lv_label_set_text(location_temperature_label, "today temperature:28 `C");
+    lv_obj_align(location_temperature_label, LV_ALIGN_CENTER, 0, 0);
 
-    //TODO 天气数据传入。选择rain,sunny,big_sunny,clouds
-    //TODO 修改天气图片大小，如果有需要可以创建一个容器，但是容器可能回留有缝隙，不美观
-    lv_obj_t* weather_condition = lv_gif_create(cont);
-    lv_obj_set_size(weather_condition, 120, 120);
-    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_START, 1, 1,
-                                            LV_GRID_ALIGN_START, 0, 1);
-    //lv_obj_t* weather_condition_gif = lv_gif_create(weather_condition);
+
+    //TODO 天气图像显示选择
+    lv_obj_t* weather_condition = lv_img_create(cont);
+    lv_obj_set_size(weather_condition, 55,55);
+    lv_obj_set_grid_cell(weather_condition, LV_GRID_ALIGN_CENTER, 1, 1,
+                                            LV_GRID_ALIGN_CENTER, 0, 1);
     lv_img_set_src(weather_condition, weather_table[20]);
+    lv_obj_align(weather_condition, LV_ALIGN_CENTER, 0, 0);
 
-    //TODO 时间参数传入。
-    //clock_create(cont);
-    lv_obj_t* current_time = lv_obj_create(cont);
+    //TODO 时间参数传入
+    lv_obj_t* current_time = clock_create(cont);
+    lv_obj_remove_style_all(current_time);
+    static lv_style_t date_time_clock_style;
+    lv_style_init(&date_time_clock_style);
+    lv_style_set_border_width(&date_time_clock_style, 0);
+    lv_obj_set_style_text_font(current_time, &lv_font_montserrat_24, 0);
+    lv_obj_add_style(current_time, &date_time_clock_style, LV_STATE_DEFAULT);
     lv_obj_set_size(current_time, 80, 80);
-    lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_STRETCH, 1, 2,
+    lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_STRETCH, 0, 1,
                                        LV_GRID_ALIGN_STRETCH, 1, 1);
-    //TODO 创建时钟
-    lv_label_set_text(current_time, "23:15");
+    //TODO 传入室内温度数据
+    lv_obj_t* room_temperature_slider = lv_slider_create(cont);
+    //lv_obj_remove_style_all(room_temperature_slider);
+    lv_obj_set_grid_cell(room_temperature_slider, LV_GRID_ALIGN_STRETCH, 0, 1,
+                                                   LV_GRID_ALIGN_STRETCH, 2, 1);
+    lv_obj_set_width(room_temperature_slider, 120);
+    lv_obj_set_height(room_temperature_slider, 30);
+    lv_obj_align(room_temperature_slider, NULL, LV_ALIGN_CENTER, 0, -80);
+    lv_obj_add_event_cb(room_temperature_slider, temperature_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    lv_slider_set_range(room_temperature_slider, 0, 100);
 
-    //lv_obj_t* label = lv_label_create(weather_condition);
-    //lv_obj_t* temperature = lv_label_create(cont);
-    //lv_label_set_long_mode(temperature, LV_LABEL_LONG_WRAP);
-    //lv_label_set_recolor(temperature, true);
-    //lv_label_set_text(temperature, "25度");
-    //lv_obj_set_grid_cell(temperature, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 4, 1);
-    //lv_obj_align(temperature, LV_ALIGN_CENTER, 0, -40);
+    room_temperature_slider_label = lv_label_create(parent);
+    lv_label_set_text(room_temperature_slider_label, "0%");
 
-    //lv_obj_set_grid_cell(current_date, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 6, 1);
-    //lv_obj_set_grid_cell(air_quality, LV_GRID_ALIGN_STRETCH, 0, 1, LV_ALIGN_CENTER, 8, 1);
+    lv_obj_align_to(room_temperature_slider_label, room_temperature_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+
+    
     return cont;
 }
 static void auto_step_cb(lv_timer_t* timer)
@@ -351,10 +413,10 @@ static void auto_step_cb(lv_timer_t* timer)
         case 5:
         {
 
-            printf("删除gif\n");
+            printf("delete gif\n");
             lv_obj_t* child = lv_obj_get_child(start_anim_obj, 0);
             lv_obj_del(child);
-            backup = menu_create(menu_obj);
+            menu_create(menu_obj);
         }
         case 10:
         {
