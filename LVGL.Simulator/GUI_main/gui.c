@@ -322,10 +322,10 @@ static lv_obj_t* clock_create(lv_obj_t* parent)
 */
 static lv_obj_t* weather_windows_create(lv_obj_t* parent)
 {
+    LV_IMG_DECLARE(astronaut);
     lv_obj_t* cont = lv_obj_create(parent);
     //lv_obj_set_style_bg_color(cont, lv_color_hex(0x00BFFF), 0);
 
-    lv_obj_t* astronaut_img = lv_obj_create(cont);
     lv_obj_t* air_quality = lv_obj_create(cont);
     lv_obj_t* location_obj = lv_obj_create(cont);
 
@@ -377,24 +377,28 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     lv_obj_set_style_text_font(current_time, &lv_font_montserrat_24, 0);
     lv_obj_add_style(current_time, &date_time_clock_style, LV_STATE_DEFAULT);
     lv_obj_set_size(current_time, 80, 80);
-    lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_STRETCH, 0, 1,
-                                       LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_START, 0, 1,
+                                       LV_GRID_ALIGN_START, 1, 1);
     //TODO 传入室内温度数据
     lv_obj_t* room_temperature_slider = lv_slider_create(cont);
     //lv_obj_remove_style_all(room_temperature_slider);
     lv_obj_set_grid_cell(room_temperature_slider, LV_GRID_ALIGN_STRETCH, 0, 1,
                                                    LV_GRID_ALIGN_STRETCH, 2, 1);
+    lv_obj_refr_size(room_temperature_slider);
     lv_obj_set_width(room_temperature_slider, 120);
     lv_obj_set_height(room_temperature_slider, 30);
-    lv_obj_align(room_temperature_slider, NULL, LV_ALIGN_CENTER, 0, -80);
+    lv_obj_align(room_temperature_slider, LV_ALIGN_CENTER, 0, -80);
     lv_obj_add_event_cb(room_temperature_slider, temperature_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
     lv_slider_set_range(room_temperature_slider, 0, 100);
 
-    room_temperature_slider_label = lv_label_create(parent);
+    room_temperature_slider_label = lv_label_create(cont);
     lv_label_set_text(room_temperature_slider_label, "0%");
-
     lv_obj_align_to(room_temperature_slider_label, room_temperature_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
 
+    lv_obj_t* anstronaut_gif = lv_gif_create(cont);
+    lv_obj_set_grid_cell(anstronaut_gif, LV_GRID_ALIGN_CENTER, 1, 1,
+                                            LV_GRID_ALIGN_CENTER, 2, 1);
+    lv_gif_set_src(anstronaut_gif, &astronaut);
     
     return cont;
 }

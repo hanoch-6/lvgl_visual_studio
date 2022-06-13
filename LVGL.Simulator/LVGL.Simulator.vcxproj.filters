@@ -19,7 +19,6 @@
     <ClCompile Include="GUI_main\gui.c" />
     <ClCompile Include="GUI_main\font\myFont_one.c" />
     <ClCompile Include="GUI_main\images\xiaoxin.c" />
-    <ClCompile Include="GUI_main\images\bear.c" />
     <ClCompile Include="GUI_main\images\weather\weather.c" />
     <ClCompile Include="GUI_main\images\weather\img_blustery.c" />
     <ClCompile Include="GUI_main\images\weather\img_clear.c" />
@@ -61,6 +60,7 @@
     <ClCompile Include="GUI_main\images\weather\img_tropical_storm.c" />
     <ClCompile Include="GUI_main\images\weather\img_unknown.c" />
     <ClCompile Include="GUI_main\images\weather\img_windy.c" />
+    <ClCompile Include="GUI_main\images\astronaut.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />
