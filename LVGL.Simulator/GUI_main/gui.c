@@ -416,7 +416,6 @@ static void auto_step_cb(lv_timer_t* timer)
         break;
         case 5:
         {
-
             printf("delete gif\n");
             lv_obj_t* child = lv_obj_get_child(start_anim_obj, 0);
             lv_obj_del(child);
