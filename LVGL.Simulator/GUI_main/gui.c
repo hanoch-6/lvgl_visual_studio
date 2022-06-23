@@ -125,7 +125,6 @@ static void* weather_table[] = {
 static lv_obj_t* start_anim_create(lv_obj_t* parent);
 static lv_obj_t* menu_create(lv_obj_t* parent);
 static lv_obj_t* weather_windows_create(lv_obj_t* parent);
-static lv_obj_t* slider_create(lv_obj_t* parent);
 static lv_obj_t* clock_create(lv_obj_t* parent);
 static void auto_step_cb(lv_timer_t* timer);
 static void clock_date_task_callback(lv_timer_t* timer);
@@ -141,7 +140,6 @@ static lv_obj_t* label_hour;
 static lv_obj_t* label_min;
 static lv_obj_t* label_sec;
 static lv_obj_t* label_dot;
-static lv_obj_t* room_temperature_slider_label;
 static lv_font_t* font_normal;
 lv_timer_t* Autoplay_timer;
 lv_obj_t* backup;
@@ -165,14 +163,6 @@ void gui_start(void)
 /**********************
 *   STATIC FUNCTIONS
 **********************/
-static void temperature_slider_event_cb(lv_event_t* e)
-{
-    lv_obj_t* slider = lv_event_get_target(e);
-    char buf[8];
-    lv_snprintf(buf, sizeof(buf), "%d%%", lv_slider_get_value(slider));
-    lv_label_set_text(room_temperature_slider_label, buf);
-    lv_obj_align_to(room_temperature_slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
-}
 
 
 static void clock_date_task_callback(lv_timer_t* timer)
@@ -239,7 +229,7 @@ static lv_obj_t* start_anim_create(lv_obj_t* parent)
     lv_obj_t* scroll_Info = lv_label_create(cont);
     lv_label_set_long_mode(scroll_Info, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_obj_set_width(scroll_Info, 150);
-    lv_label_set_text(scroll_Info, "黄妙之&小新, 三年2班\nLVGL version:8.3");
+    lv_label_set_text(scroll_Info, "Hanoch&, 三年2班\nLVGL version:8.3");
 
     lv_obj_align(scroll_Info, LV_ALIGN_BOTTOM_MID, 0, -HOR_STEP);
     
@@ -376,25 +366,22 @@ static lv_obj_t* weather_windows_create(lv_obj_t* parent)
     lv_style_set_border_width(&date_time_clock_style, 0);
     lv_obj_set_style_text_font(current_time, &lv_font_montserrat_24, 0);
     lv_obj_add_style(current_time, &date_time_clock_style, LV_STATE_DEFAULT);
-    lv_obj_set_size(current_time, 80, 80);
+    lv_obj_set_size(current_time, 100, 80);
     lv_obj_set_grid_cell(current_time, LV_GRID_ALIGN_START, 0, 1,
                                        LV_GRID_ALIGN_START, 1, 1);
     //TODO 传入室内温度数据
-    lv_obj_t* room_temperature_slider = lv_slider_create(cont);
-    //lv_obj_remove_style_all(room_temperature_slider);
-    lv_obj_set_grid_cell(room_temperature_slider, LV_GRID_ALIGN_STRETCH, 0, 1,
-                                                   LV_GRID_ALIGN_STRETCH, 2, 1);
-    lv_obj_refr_size(room_temperature_slider);
-    lv_obj_set_width(room_temperature_slider, 120);
-    lv_obj_set_height(room_temperature_slider, 30);
-    lv_obj_align(room_temperature_slider, LV_ALIGN_CENTER, 0, -80);
-    lv_obj_add_event_cb(room_temperature_slider, temperature_slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
-    lv_slider_set_range(room_temperature_slider, 0, 100);
-
+    static lv_obj_t* room_temperature_slider_label;
     room_temperature_slider_label = lv_label_create(cont);
-    lv_label_set_text(room_temperature_slider_label, "0%");
-    lv_obj_align_to(room_temperature_slider_label, room_temperature_slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 10);
+    lv_obj_remove_style_all(room_temperature_slider_label);
+    lv_obj_set_size(room_temperature_slider_label, 100, 55);
+    lv_label_set_long_mode(room_temperature_slider_label, LV_LABEL_LONG_WRAP);
+    lv_label_set_recolor(room_temperature_slider_label, true);
+    lv_label_set_text(room_temperature_slider_label, "#0000ff room:32度#");
+    lv_obj_align(room_temperature_slider_label, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_grid_cell(room_temperature_slider_label, LV_GRID_ALIGN_START, 0, 1,
+                                       LV_GRID_ALIGN_START, 2, 1);
 
+    //太空人gif
     lv_obj_t* anstronaut_gif = lv_gif_create(cont);
     lv_obj_set_grid_cell(anstronaut_gif, LV_GRID_ALIGN_CENTER, 1, 1,
                                             LV_GRID_ALIGN_CENTER, 2, 1);
